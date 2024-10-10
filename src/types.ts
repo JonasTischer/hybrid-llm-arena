@@ -4,6 +4,7 @@ export interface ApiConfig {
 }
 
 export interface PromptResult {
+  timestamp: Date;
   prompt: string;
   humanVote: 'api1' | 'api2';
   judgeVote: {

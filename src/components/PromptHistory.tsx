@@ -31,6 +31,7 @@ export const PromptHistory: React.FC<PromptHistoryProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Timestamp</TableHead>
               <TableHead>Prompt</TableHead>
               <TableHead>Human Vote</TableHead>
               <TableHead>LLM Judge Vote</TableHead>
@@ -41,6 +42,9 @@ export const PromptHistory: React.FC<PromptHistoryProps> = ({
           <TableBody>
             {promptResults.map((result, index) => (
               <TableRow key={index}>
+                <TableCell>
+                  {result.timestamp.toLocaleString()}
+                </TableCell>
                 <TableCell>{result.prompt}</TableCell>
                 <TableCell>
                   {result.humanVote === 'api1' ? 'API 1' : 'API 2'}

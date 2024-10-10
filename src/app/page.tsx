@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ApiConfigComponent } from '@/components/api-config';
 import { PromptSelection } from '@/components/prompt-selection';
@@ -36,21 +36,6 @@ export default function Home() {
   const [currentVote, setCurrentVote] = useState<
     'api1' | 'api2' | null
   >(null);
-
-  useEffect(() => {
-    if (prompts.length === 0) {
-      setPrompts([
-        'Explain the concept of quantum computing to a 10-year-old.',
-        'Write a short story about a robot learning to feel emotions.',
-        "Describe the taste of a food you've never tried before.",
-        'How would you solve world hunger using only technology available today?',
-        'Create a haiku about the internet.',
-      ]);
-      setCurrentPrompt(
-        'Explain the concept of quantum computing to a 10-year-old.'
-      );
-    }
-  }, [prompts]);
 
   const getRandomPrompt = () => {
     const availablePrompts = prompts.filter(
@@ -98,6 +83,7 @@ export default function Home() {
     setPromptResults((prev) => [
       ...prev,
       {
+        timestamp: new Date(),
         prompt: currentPrompt,
         humanVote: api,
         judgeVote: {
@@ -151,21 +137,19 @@ export default function Home() {
         </CardContent>
       </Card>
 
-      {showPromptSelection && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Prompt Selection</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PromptSelection
-              prompts={prompts}
-              currentPrompt={currentPrompt}
-              setPrompts={setPrompts}
-              setCurrentPrompt={setCurrentPrompt}
-            />
-          </CardContent>
-        </Card>
-      )}
+      <Card className={showPromptSelection ? '' : 'hidden'}>
+        <CardHeader>
+          <CardTitle>Prompt Selection</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PromptSelection
+            prompts={prompts}
+            currentPrompt={currentPrompt}
+            setPrompts={setPrompts}
+            setCurrentPrompt={setCurrentPrompt}
+          />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
