@@ -1,101 +1,212 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { ApiConfigComponent } from '@/components/api-config';
+import { PromptSelection } from '@/components/prompt-selection';
+import { ResponseCard } from '@/components/response-card';
+import { ResultsComparison } from '@/components/results-comparison';
+import { ApiConfig } from '@/types';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [api1, setApi1] = useState<ApiConfig>({
+    endpoint: '',
+    token: '',
+  });
+  const [api2, setApi2] = useState<ApiConfig>({
+    endpoint: '',
+    token: '',
+  });
+  const [prompts, setPrompts] = useState<string[]>([]);
+  const [currentPrompt, setCurrentPrompt] = useState('');
+  const [responses, setResponses] = useState({ api1: '', api2: '' });
+  const [votes, setVotes] = useState({ api1: 0, api2: 0 });
+  const [promptResults, setPromptResults] = useState<any[]>([]);
+  const [showConfig, setShowConfig] = useState(false);
+  const [showPromptSelection, setShowPromptSelection] =
+    useState(false);
+  const [currentVote, setCurrentVote] = useState<
+    'api1' | 'api2' | null
+  >(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    if (prompts.length === 0) {
+      setPrompts([
+        'Explain the concept of quantum computing to a 10-year-old.',
+        'Write a short story about a robot learning to feel emotions.',
+        "Describe the taste of a food you've never tried before.",
+        'How would you solve world hunger using only technology available today?',
+        'Create a haiku about the internet.',
+      ]);
+      setCurrentPrompt(
+        'Explain the concept of quantum computing to a 10-year-old.'
+      );
+    }
+  }, []);
+
+  const getRandomPrompt = () => {
+    const availablePrompts = prompts.filter(
+      (prompt) => prompt !== currentPrompt
+    );
+    if (availablePrompts.length === 0) return currentPrompt;
+    const randomIndex = Math.floor(
+      Math.random() * availablePrompts.length
+    );
+    return availablePrompts[randomIndex];
+  };
+
+  const handleSendNextPrompt = async () => {
+    // Set the next prompt
+    setCurrentPrompt(getRandomPrompt());
+
+    // Reset current vote and responses
+    setCurrentVote(null);
+    setResponses({ api1: '', api2: '' });
+
+    setResponses({
+      api1: `API 1 response for: ${currentPrompt}`,
+      api2: `API 2 response for: ${currentPrompt}`,
+    });
+  };
+
+  const handleVote = (api: 'api1' | 'api2') => {
+    setVotes((prev) => ({ ...prev, [api]: prev[api] + 1 }));
+    setCurrentVote(api);
+
+    // Simulate LLM judge vote and metrics
+    const judgeVote = {
+      winner: Math.random() > 0.5 ? 'api1' : 'api2',
+      reason: 'Simulated reason',
+      metrics: [
+        {
+          name: 'Overall Score',
+          api1Score: Math.random() * 100,
+          api2Score: Math.random() * 100,
+        },
+      ],
+    };
+
+    // Add result to promptResults
+    setPromptResults((prev) => [
+      ...prev,
+      {
+        prompt: currentPrompt,
+        humanVote: api,
+        judgeVote: judgeVote,
+      },
+    ]);
+  };
+
+  return (
+    <div className="container mx-auto p-4 space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-3xl font-bold">
+            HybridLLM Arena
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Button
+            onClick={() => setShowConfig(!showConfig)}
+            className="mb-4 mr-2"
           >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            {showConfig ? 'Hide API Config' : 'Show API Config'}
+          </Button>
+          <Button
+            onClick={() =>
+              setShowPromptSelection(!showPromptSelection)
+            }
+            className="mb-4"
+          >
+            {showPromptSelection
+              ? 'Hide Prompt Selection'
+              : 'Show Prompt Selection'}
+          </Button>
+          {showConfig && (
+            <div className="grid grid-cols-2 gap-4">
+              <ApiConfigComponent
+                apiConfig={api1}
+                setApiConfig={setApi1}
+                apiName="API 1"
+              />
+              <ApiConfigComponent
+                apiConfig={api2}
+                setApiConfig={setApi2}
+                apiName="API 2"
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {showPromptSelection && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Prompt Selection</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PromptSelection
+              prompts={prompts}
+              currentPrompt={currentPrompt}
+              setPrompts={setPrompts}
+              setCurrentPrompt={setCurrentPrompt}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Current Prompt</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="mb-4">
+            {currentPrompt || 'No prompt selected'}
+          </p>
+          <Button
+            onClick={handleSendNextPrompt}
+            disabled={
+              !currentPrompt ||
+              (responses.api1 && responses.api2 && !currentVote)
+            }
           >
-            Read our docs
-          </a>
+            Send next prompt
+          </Button>
+        </CardContent>
+      </Card>
+
+      {responses.api1 && responses.api2 && (
+        <div className="grid grid-cols-2 gap-4">
+          <ResponseCard
+            apiName="API 1"
+            response={responses.api1}
+            onVote={() => handleVote('api1')}
+            isSelected={currentVote === 'api1'}
+            isDisabled={currentVote !== null}
+          />
+          <ResponseCard
+            apiName="API 2"
+            response={responses.api2}
+            onVote={() => handleVote('api2')}
+            isSelected={currentVote === 'api2'}
+            isDisabled={currentVote !== null}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
+
+      {currentVote && (
+        <ResultsComparison
+          responses={responses}
+          userVotes={votes}
+          promptResults={promptResults}
+        />
+      )}
     </div>
   );
 }
