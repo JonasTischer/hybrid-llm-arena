@@ -1,12 +1,27 @@
-import React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { PromptResult } from '@/types';
 
 interface PromptHistoryProps {
-  promptResults: any[]
+  promptResults: PromptResult[];
 }
 
-export const PromptHistory: React.FC<PromptHistoryProps> = ({ promptResults }) => {
+export const PromptHistory: React.FC<PromptHistoryProps> = ({
+  promptResults,
+}) => {
   return (
     <Card>
       <CardHeader>
@@ -27,15 +42,25 @@ export const PromptHistory: React.FC<PromptHistoryProps> = ({ promptResults }) =
             {promptResults.map((result, index) => (
               <TableRow key={index}>
                 <TableCell>{result.prompt}</TableCell>
-                <TableCell>{result.humanVote === 'api1' ? 'API 1' : 'API 2'}</TableCell>
-                <TableCell>{result.judgeVote.winner === 'api1' ? 'API 1' : 'API 2'}</TableCell>
-                <TableCell>{result.judgeVote.metrics[0].api1Score}</TableCell>
-                <TableCell>{result.judgeVote.metrics[0].api2Score}</TableCell>
+                <TableCell>
+                  {result.humanVote === 'api1' ? 'API 1' : 'API 2'}
+                </TableCell>
+                <TableCell>
+                  {result.judgeVote.winner === 'api1'
+                    ? 'API 1'
+                    : 'API 2'}
+                </TableCell>
+                <TableCell>
+                  {result.judgeVote.metrics[0].api1Score}
+                </TableCell>
+                <TableCell>
+                  {result.judgeVote.metrics[0].api2Score}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

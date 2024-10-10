@@ -9,15 +9,15 @@ import {
 } from '@/components/ui/tabs';
 import { HumanVoteChart } from '@/components/HumanVoteChart';
 import { LLMJudgeChart } from '@/components/LLMJudgeChart';
-import { VotingSummary } from '@/components/VotingSummary';
 import { MetricsComparison } from '@/components/MetricsComparison';
 import { LLMJudgeEvaluation } from '@/components/LLMJudgeEvaluation';
 import { PromptHistory } from '@/components/PromptHistory';
+import { Metrics, PromptResult } from '@/types';
 
 type Props = {
   responses: { api1: string; api2: string };
   userVotes: { api1: number; api2: number };
-  promptResults: any[];
+  promptResults: PromptResult[];
 };
 
 export const ResultsComparison: React.FC<Props> = ({
@@ -25,17 +25,36 @@ export const ResultsComparison: React.FC<Props> = ({
   userVotes,
   promptResults,
 }) => {
-  const [metrics, setMetrics] = useState<any[]>([]);
-  const [judgeVote, setJudgeVote] = useState<any>(null);
-  const [humanVoteHistory, setHumanVoteHistory] = useState<any[]>([]);
-  const [llmVoteHistory, setLLMVoteHistory] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<Metrics[]>([]);
+  const [judgeVote, setJudgeVote] = useState<{
+    winner: 'api1' | 'api2';
+    reason: string;
+  } | null>(null);
+  const [humanVoteHistory, setHumanVoteHistory] = useState<
+    { timestamp: string; api1: number; api2: number }[]
+  >([]);
+  const [llmVoteHistory, setLLMVoteHistory] = useState<
+    { timestamp: string; api1: number; api2: number }[]
+  >([]);
 
   useEffect(() => {
     // Simulating metrics and judge vote (replace with actual logic)
     setMetrics([
-      { name: 'Text Clarity', api1Score: Math.random() * 100, api2Score: Math.random() * 100 },
-      { name: 'Response Length', api1Score: Math.random() * 100, api2Score: Math.random() * 100 },
-      { name: 'Relevance (LLM Judge)', api1Score: Math.random() * 100, api2Score: Math.random() * 100 },
+      {
+        name: 'Text Clarity',
+        api1Score: Math.random() * 100,
+        api2Score: Math.random() * 100,
+      },
+      {
+        name: 'Response Length',
+        api1Score: Math.random() * 100,
+        api2Score: Math.random() * 100,
+      },
+      {
+        name: 'Relevance (LLM Judge)',
+        api1Score: Math.random() * 100,
+        api2Score: Math.random() * 100,
+      },
       {
         name: 'Factual Accuracy (LLM Judge)',
         api1Score: Math.random() * 100,

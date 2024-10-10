@@ -6,7 +6,7 @@ import { ApiConfigComponent } from '@/components/api-config';
 import { PromptSelection } from '@/components/prompt-selection';
 import { ResponseCard } from '@/components/response-card';
 import { ResultsComparison } from '@/components/results-comparison';
-import { ApiConfig } from '@/types';
+import { ApiConfig, PromptResult } from '@/types';
 import {
   Card,
   CardContent,
@@ -27,7 +27,9 @@ export default function Home() {
   const [currentPrompt, setCurrentPrompt] = useState('');
   const [responses, setResponses] = useState({ api1: '', api2: '' });
   const [votes, setVotes] = useState({ api1: 0, api2: 0 });
-  const [promptResults, setPromptResults] = useState<any[]>([]);
+  const [promptResults, setPromptResults] = useState<PromptResult[]>(
+    []
+  );
   const [showConfig, setShowConfig] = useState(false);
   const [showPromptSelection, setShowPromptSelection] =
     useState(false);
@@ -48,7 +50,7 @@ export default function Home() {
         'Explain the concept of quantum computing to a 10-year-old.'
       );
     }
-  }, []);
+  }, [prompts]);
 
   const getRandomPrompt = () => {
     const availablePrompts = prompts.filter(
@@ -98,7 +100,11 @@ export default function Home() {
       {
         prompt: currentPrompt,
         humanVote: api,
-        judgeVote: judgeVote,
+        judgeVote: {
+          winner: judgeVote.winner as 'api1' | 'api2',
+          reason: judgeVote.reason,
+          metrics: judgeVote.metrics,
+        },
       },
     ]);
   };
@@ -173,7 +179,7 @@ export default function Home() {
             onClick={handleSendNextPrompt}
             disabled={
               !currentPrompt ||
-              (responses.api1 && responses.api2 && !currentVote)
+              (!!responses.api1 && !!responses.api2 && !currentVote)
             }
           >
             Send next prompt
